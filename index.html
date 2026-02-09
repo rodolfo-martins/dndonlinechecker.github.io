@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DarkerDB API for Nightbot</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <script>
+        // Função para buscar dados da API do DarkerDB
+        async function getPopulationData() {
+            try {
+                // Tentar diferentes endpoints
+                const endpoints = [
+                    'https://darkerdb.com/api/v1/population',
+                    'https://darkerdb.com/api/v1/population-history',
+                    'https://darkerdb.com/api/v1/population/current'
+                ];
+                
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(endpoint);
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            // Formatar dados para Nightbot
+                            let result = '';
+                            
+                            if (data.total !== undefined) {
+                                // Endpoint direto
+                                result = `Total: ${data.total} Lobby: ${data.lobby} Dungeon: ${data.dungeon}`;
+                            } else if (data.data && data.data.length > 0) {
+                                // Endpoint history
+                                const latest = data.data[data.data.length - 1];
+                                result = `Total: ${latest.total} Lobby: ${latest.lobby} Dungeon: ${latest.dungeon}`;
+                            }
+                            
+                            if (result) {
+                                document.body.textContent = result;
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+                
+                // Se falhar, tentar extrair do HTML
+                const pageResponse = await fetch('https://darkerdb.com/server-population');
+                const pageText = await pageResponse.text();
+                
+                // Procurar números no HTML
+                const numbers = pageText.match(/\d+[,\d]*/g);
+                if (numbers && numbers.length >= 3) {
+                    document.body.textContent = `Total: ${numbers[0]} Lobby: ${numbers[1]} Dungeon: ${numbers[2]}`;
+                } else {
+                    document.body.textContent = 'API indisponível';
+                }
+                
+            } catch (error) {
+                document.body.textContent = 'Erro ao buscar dados';
+            }
+        }
+        
+        getPopulationData();
+    </script>
+</body>
+</html>
