@@ -6,29 +6,80 @@
 </head>
 <body>
     <script>
-        // Buscar dados reais da API
+        // Tentar diferentes métodos para contornar CORS
         async function getRealPopulationData() {
+            // Método 1: Usar proxy CORS público
             try {
-                const response = await fetch('https://api.darkerdb.com/v1/population');
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const response = await fetch(proxyUrl + 'https://api.darkerdb.com/v1/population', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.total !== undefined) {
+                        const result = `Dungeon: ${data.dungeon.toLocaleString()} Lobby: ${data.lobby.toLocaleString()} Total: ${data.total.toLocaleString()}`;
+                        document.body.textContent = result;
+                        return;
+                    }
                 }
-                
-                const data = await response.json();
-                
-                // Verificar se os dados existem
-                if (data && data.total !== undefined && data.lobby !== undefined && data.dungeon !== undefined) {
-                    const result = `Dungeon: ${data.dungeon.toLocaleString()} Lobby: ${data.lobby.toLocaleString()} Total: ${data.total.toLocaleString()}`;
-                    document.body.textContent = result;
-                } else {
-                    document.body.textContent = 'Dados inválidos da API';
-                }
-                
-            } catch (error) {
-                console.error('Erro ao buscar dados:', error);
-                document.body.textContent = `Erro: ${error.message}`;
+            } catch (e) {
+                console.log('Proxy method failed');
             }
+            
+            // Método 2: Usar JSONP (se a API suportar)
+            try {
+                const callbackName = 'callback_' + Date.now();
+                window[callbackName] = function(data) {
+                    if (data && data.total !== undefined) {
+                        const result = `Dungeon: ${data.dungeon.toLocaleString()} Lobby: ${data.lobby.toLocaleString()} Total: ${data.total.toLocaleString()}`;
+                        document.body.textContent = result;
+                    }
+                    delete window[callbackName];
+                };
+                
+                const script = document.createElement('script');
+                script.src = `https://api.darkerdb.com/v1/population?callback=${callbackName}`;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.textContent = 'JSONP failed';
+                };
+                document.head.appendChild(script);
+                return;
+            } catch (e) {
+                console.log('JSONP method failed');
+            }
+            
+            // Método 3: Usar servidor proxy alternativo
+            try {
+                const proxies = [
+                    'https://api.allorigins.win/raw?url=',
+                    'https://corsproxy.io/?',
+                    'https://thingproxy.freeboard.io/fetch/'
+                ];
+                
+                for (const proxy of proxies) {
+                    try {
+                        const response = await fetch(proxy + 'https://api.darkerdb.com/v1/population');
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data && data.total !== undefined) {
+                                const result = `Dungeon: ${data.dungeon.toLocaleString()} Lobby: ${data.lobby.toLocaleString()} Total: ${data.total.toLocaleString()}`;
+                                document.body.textContent = result;
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            } catch (e) {
+                console.log('All proxy methods failed');
+            }
+            
+            document.body.textContent = 'Todos os métodos falharam - CORS bloqueado';
         }
         
         // Executar imediatamente
