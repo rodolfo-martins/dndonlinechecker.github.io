@@ -1,27 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Dark and Darker Population</title>
+    <meta charset="UTF-8">
+    <title>Dark and Darker Stats</title>
 </head>
 <body>
-<pre id="output">Carregando...</pre>
-
-<script>
-fetch("https://api.darkerdb.com/v1/population")
-  .then(res => res.json())
-  .then(data => {
-    const dungeon = data.body.num_dungeon;
-    const lobby = data.body.num_lobby;
-    const total = data.body.num_online;
-
-    document.body.innerText =
-      `Dungeon: ${dungeon} | Lobby: ${lobby} | Total: ${total}`;
-  })
-  .catch(() => {
-    document.body.innerText = "Erro ao buscar dados";
-  });
-</script>
-
+    <div id="stats">Carregando...</div>
+    
+    <script>
+        async function getStats() {
+            try {
+                const response = await fetch('https://api.darkerdb.com/v1/population');
+                const data = await response.json();
+                
+                const dungeon = data.body.num_dungeon;
+                const lobby = data.body.num_lobby;
+                const total = data.body.num_online;
+                
+                // Formato para o Nightbot
+                document.getElementById('stats').textContent = 
+                    `Dungeon: ${dungeon} | Lobby: ${lobby} | Total: ${total}`;
+            } catch (error) {
+                document.getElementById('stats').textContent = 
+                    'Erro ao carregar dados';
+            }
+        }
+        
+        getStats();
+    </script>
 </body>
 </html>
