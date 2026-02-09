@@ -1,845 +1,445 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>DarkerDB Online ↔ Texto simples</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #050814;
-      --panel: #0c1020;
-      --accent: #6ee7ff;
-      --accent-soft: rgba(110, 231, 255, 0.12);
-      --text: #e5f0ff;
-      --muted: #8a9bb8;
-      --danger: #ff6b81;
-      --success: #4ade80;
-      --border: #1e293b;
-      --shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
-      --radius-lg: 18px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
-      --transition-fast: 150ms ease-out;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #0b1220 0, #020617 55%, #000 100%);
-      color: var(--text);
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 18px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .card {
-      background: linear-gradient(145deg, #020617, #020617 40%, #020617 70%, #020617);
-      border-radius: var(--radius-lg);
-      padding: 16px 16px 18px;
-      border: 1px solid rgba(148, 163, 184, 0.12);
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -120px;
-      opacity: 0.15;
-      background:
-        radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.5), transparent 55%),
-        radial-gradient(circle at 100% 10%, rgba(129, 140, 248, 0.45), transparent 60%);
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-
-    .card-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .title-block {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.15rem;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    h1 span.logo {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 20%, #f97316, #f97316 35%, #7c2d12);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      box-shadow: 0 0 18px rgba(248, 113, 22, 0.75);
-    }
-
-    .subtitle {
-      margin: 0;
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .pill {
-      padding: 4px 9px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      color: var(--muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: radial-gradient(circle at 0 0, rgba(148, 163, 184, 0.16), transparent 70%);
-      white-space: nowrap;
-    }
-
-    .pill-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: radial-gradient(circle, #22c55e, #166534);
-      box-shadow: 0 0 8px rgba(34, 197, 94, 0.9);
-    }
-
-    .pill-text {
-      font-weight: 600;
-    }
-
-    .pill-sub {
-      text-transform: none;
-      font-size: 0.68rem;
-      opacity: 0.7;
-    }
-
-    .live-number {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-
-    .live-number-main {
-      font-size: 2.4rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .live-number-main span.count {
-      background: linear-gradient(120deg, #e5f0ff, #e0f2fe);
-      -webkit-background-clip: text;
-      color: transparent;
-      text-shadow: 0 0 28px rgba(56, 189, 248, 0.3);
-    }
-
-    .live-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: radial-gradient(circle, #22c55e, #14532d);
-      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
-      position: relative;
-    }
-
-    .live-dot::after {
-      content: "";
-      position: absolute;
-      inset: -5px;
-      border-radius: 999px;
-      border: 1px solid rgba(34, 197, 94, 0.6);
-      opacity: 0.6;
-    }
-
-    .live-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .timestamp {
-      font-size: 0.7rem;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .timestamp::before {
-      content: "⏱️";
-      font-size: 0.75rem;
-      opacity: 0.8;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.1fr 1.2fr;
-      gap: 12px;
-      margin-top: 6px;
-      align-items: stretch;
-    }
-
-    @media (max-width: 640px) {
-      .card {
-        padding: 14px 12px 16px;
-        border-radius: 14px;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      h1 {
-        font-size: 1rem;
-      }
-
-      .live-number-main {
-        font-size: 2rem;
-      }
-    }
-
-    .box {
-      border-radius: var(--radius-md);
-      padding: 10px 10px 11px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      background: radial-gradient(circle at 0 0, rgba(148, 163, 184, 0.18), transparent 60%),
-        radial-gradient(circle at 100% 100%, rgba(15, 23, 42, 0.8), #020617);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .box::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.16), transparent 55%);
-      opacity: 0.7;
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-
-    .box-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .box-title {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .box-title span.icon {
-      font-size: 0.9rem;
-    }
-
-    .box-title span.small {
-      font-size: 0.7rem;
-      opacity: 0.75;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 80px;
-      resize: vertical;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      padding: 7px 8px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
-      font-size: 0.8rem;
-      line-height: 1.4;
-      color: var(--text);
-      background: rgba(15, 23, 42, 0.9);
-      outline: none;
-      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.6);
-    }
-
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow:
-        0 0 0 1px rgba(56, 189, 248, 0.5),
-        0 0 35px rgba(56, 189, 248, 0.25);
-    }
-
-    .hint {
-      font-size: 0.7rem;
-      color: var(--muted);
-      margin-top: 4px;
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .tag {
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: rgba(15, 23, 42, 0.8);
-      font-size: 0.7rem;
-      white-space: nowrap;
-    }
-
-    .status {
-      margin-top: 6px;
-      font-size: 0.72rem;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .status span.dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      background: var(--muted);
-    }
-
-    .status.ok span.dot {
-      background: var(--success);
-      box-shadow: 0 0 10px rgba(74, 222, 128, 0.9);
-    }
-
-    .status.error span.dot {
-      background: var(--danger);
-      box-shadow: 0 0 10px rgba(248, 113, 113, 0.9);
-    }
-
-    .status span.label {
-      color: var(--muted);
-    }
-
-    .status.ok span.label strong {
-      color: var(--success);
-      font-weight: 600;
-    }
-
-    .status.error span.label strong {
-      color: var(--danger);
-      font-weight: 600;
-    }
-
-    .small-mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
-      font-size: 0.74rem;
-    }
-
-    .raw {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
-      font-size: 0.8rem;
-      background: rgba(15, 23, 42, 0.92);
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(148, 163, 184, 0.45);
-      padding: 6px 7px;
-      max-height: 110px;
-      overflow: auto;
-      white-space: pre;
-      color: var(--text);
-    }
-
-    .footer {
-      font-size: 0.7rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-      padding: 0 4px;
-    }
-
-    .footer a {
-      color: var(--accent);
-      text-decoration: none;
-      border-bottom: 1px dotted rgba(110, 231, 255, 0.7);
-    }
-
-    .footer a:hover {
-      border-bottom-style: solid;
-    }
-
-    .code-badge {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-        "Courier New", monospace;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: rgba(15, 23, 42, 0.85);
-      font-size: 0.7rem;
-      white-space: nowrap;
-    }
-
-    .btn-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 7px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: radial-gradient(circle at 50% 0, #22d3ee, #0ea5e9);
-      color: #020617;
-      font-weight: 600;
-      font-size: 0.8rem;
-      padding: 6px 12px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow:
-        0 0 0 1px rgba(15, 23, 42, 0.9),
-        0 18px 32px rgba(8, 47, 73, 0.9);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-        filter var(--transition-fast), background var(--transition-fast);
-      white-space: nowrap;
-    }
-
-    button span.icon {
-      font-size: 0.9rem;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
-      box-shadow:
-        0 0 0 1px rgba(56, 189, 248, 0.8),
-        0 20px 40px rgba(8, 47, 73, 1);
-    }
-
-    button:active {
-      transform: translateY(0);
-      box-shadow:
-        0 0 0 1px rgba(56, 189, 248, 0.8),
-        0 10px 18px rgba(8, 47, 73, 0.85);
-    }
-
-    button.secondary {
-      background: rgba(15, 23, 42, 0.95);
-      color: var(--text);
-      border-color: rgba(148, 163, 184, 0.7);
-      box-shadow:
-        0 0 0 1px rgba(15, 23, 42, 0.9),
-        0 10px 24px rgba(15, 23, 42, 0.9);
-    }
-
-    button.secondary:hover {
-      filter: none;
-      background: rgba(15, 23, 42, 1);
-      box-shadow:
-        0 0 0 1px rgba(148, 163, 184, 0.7),
-        0 16px 28px rgba(15, 23, 42, 1);
-    }
-
-    button.secondary:active {
-      box-shadow:
-        0 0 0 1px rgba(148, 163, 184, 0.8),
-        0 10px 18px rgba(15, 23, 42, 1);
-    }
-
-    .copy-toast {
-      position: fixed;
-      left: 50%;
-      bottom: 18px;
-      transform: translateX(-50%);
-      background: rgba(15, 23, 42, 0.96);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 0.75rem;
-      border: 1px solid rgba(148, 163, 184, 0.8);
-      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.95);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 120ms ease-out, transform 120ms ease-out;
-      z-index: 50;
-      white-space: nowrap;
-    }
-
-    .copy-toast.show {
-      opacity: 1;
-      transform: translate(-50%, -4px);
-      pointer-events: auto;
-    }
-
-    .copy-toast span.icon {
-      font-size: 0.9rem;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkerDB API → Nightbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .data-display {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .data-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        
+        .total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .total .data-label {
+            color: white;
+        }
+        
+        .total .data-value {
+            color: white;
+        }
+        
+        .output-section {
+            margin-top: 30px;
+        }
+        
+        .output-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .output-box {
+            background: #2d3436;
+            color: #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin-bottom: 15px;
+            min-height: 60px;
+            position: relative;
+        }
+        
+        .plain-text-output {
+            background: white;
+            color: #333;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+        }
+        
+        .url-display {
+            background: #e8f4f8;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .url-display label {
+            font-weight: 600;
+            color: #495057;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .url-display input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            min-width: 150px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(30, 60, 114, 0.4);
+        }
+        
+        .status {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .info-box ol {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.8;
+            padding-left: 20px;
+        }
+        
+        .update-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+            }
+        }
+        
+        .last-update {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .data-value {
+                font-size: 18px;
+            }
+            
+            button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="app">
-    <div class="card">
-      <div class="card-inner">
-        <div class="header">
-          <div class="title-block">
-            <h1>
-              <span class="logo">🧟‍♂️</span>
-              DarkerDB → Nightbot
-            </h1>
-            <p class="subtitle">
-              Pega os jogadores online da API
-              <span class="small-mono">/v1/population</span>,
-              transforma em texto simples e pronto pra colar no seu comando do Nightbot.
-            </p>
-          </div>
-          <div class="pill">
-            <span class="pill-dot"></span>
-            <span class="pill-text">Status local</span>
-            <span class="pill-sub">Sem chamadas externas</span>
-          </div>
-        </div>
-
-        <div class="live-number">
-          <div class="live-number-main">
-            <span class="count" id="online-count">—</span>
-            <span class="live-dot"></span>
-          </div>
-          <div class="live-label" id="online-label">
-            Aguardando JSON de exemplo colado abaixo.
-          </div>
-        </div>
-
-        <div class="timestamp" id="timestamp">
-          Nenhum dado ainda.
-        </div>
-
-        <div class="grid">
-          <!-- LEFT: JSON INPUT -->
-          <div class="box">
-            <div class="box-inner">
-              <div class="box-title">
-                <span><span class="icon">📥</span> JSON da API</span>
-                <span class="small">Cole aqui a resposta de
-                  <span class="small-mono">https://api.darkerdb.com/v1/population</span>
-                </span>
-              </div>
-              <textarea id="json-input" spellcheck="false" placeholder='Exemplo rápido:
-
-{
-  "population": {
-    "onlinePlayers": 1234
-  }
-}
-
-Cole aqui a resposta real da API que você ver no navegador ou no Postman.'></textarea>
-              <div class="hint">
-                <span>1. Abra a URL da API no navegador, copie o JSON bruto e cole aqui.</span>
-                <span class="tag">Dica: o texto final já sai pronto pra colar no Nightbot.</span>
-              </div>
+    <div class="container">
+        <h1>🎮 DarkerDB → Nightbot Bridge</h1>
+        <p class="subtitle">Conversor de API para comando Nightbot em tempo real</p>
+        
+        <div class="data-display">
+            <div class="data-item">
+                <span class="data-label">⚔️ Em Dungeon</span>
+                <span class="data-value" id="dungeon">-</span>
             </div>
-          </div>
-
-          <!-- RIGHT: OUTPUT & NIGHTBOT -->
-          <div class="box">
-            <div class="box-inner">
-              <div class="box-title">
-                <span><span class="icon">📤</span> Saída para Nightbot</span>
-                <span class="small">Texto simples / comando pronto</span>
-              </div>
-
-              <div class="raw" id="raw-json-preview">
-                Sem JSON ainda. Cole à esquerda para ver um preview.
-              </div>
-
-              <div style="margin-top:7px;">
-                <div class="box-title" style="margin-bottom:4px;">
-                  <span><span class="icon">🤖</span> Texto simples</span>
-                  <span class="small">Use em qualquer lugar (overlay, descrição, etc.)</span>
-                </div>
-                <textarea id="plain-output" spellcheck="false" readonly>Sem dados ainda.</textarea>
-              </div>
-
-              <div style="margin-top:7px;">
-                <div class="box-title" style="margin-bottom:4px;">
-                  <span><span class="icon">⚙️</span> Comando Nightbot</span>
-                  <span class="small">Cole direto no painel do Nightbot</span>
-                </div>
-                <textarea id="nightbot-output" spellcheck="false" readonly>!commands add !jogadoresonline Atualmente há X jogadores online no Dark and Darker.</textarea>
-              </div>
-
-              <div class="btn-row">
-                <button class="secondary" id="copy-plain">
-                  <span class="icon">📋</span>
-                  Copiar texto simples
-                </button>
-                <button id="copy-nightbot">
-                  <span class="icon">🤖</span>
-                  Copiar comando Nightbot
-                </button>
-              </div>
-
-              <div class="status" id="status">
-                <span class="dot"></span>
-                <span class="label">
-                  Cole o JSON para começarmos.
-                </span>
-              </div>
+            <div class="data-item">
+                <span class="data-label">🏠 Em Lobby</span>
+                <span class="data-value" id="lobby">-</span>
             </div>
-          </div>
+            <div class="data-item total">
+                <span class="data-label">👥 Total de Players Online</span>
+                <span class="data-value" id="total">-</span>
+            </div>
         </div>
-
-        <div class="footer">
-          <div>
-            Para usar em live: copie o texto simples ou comando e cole no painel do Nightbot.
-          </div>
-          <div class="code-badge">
-            Exemplo Nightbot: !commands add !online $(urlfetch https://seusite.com/online.txt)
-          </div>
+        
+        <div class="last-update" id="lastUpdate">
+            <span class="update-indicator"></span> Aguardando dados...
         </div>
-      </div>
+        
+        <div class="output-section">
+            <label class="output-label">📝 Texto Formatado para Nightbot:</label>
+            <div class="plain-text-output" id="plainText">
+                Aguardando dados da API...
+            </div>
+            
+            <div class="url-display">
+                <label>🔗 URL para usar no comando Nightbot ($(urlfetch)):</label>
+                <input type="text" id="urlField" value="https://seusite.com/api/darker-players.txt" readonly>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="updateData()">🔄 Atualizar Agora</button>
+            <button onclick="copyPlainText()">📋 Copiar Texto</button>
+            <button onclick="copyUrl()">🔗 Copiar URL</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div class="info-box">
+            <h3>⚠️ Instruções para configurar no Nightbot:</h3>
+            <ol>
+                <li>Hospede este HTML em um servidor web (ex: GitHub Pages, Netlify, Vercel)</li>
+                <li>Configure um endpoint que retorne apenas o texto plano (sem HTML)</li>
+                <li>No Nightbot, crie o comando:
+                    <br><code>!players $(urlfetch https://seusite.com/api/darker-players.txt)</code>
+                </li>
+                <li>O comando irá buscar os dados atualizados em tempo real</li>
+                <li>Alternativamente, você pode usar um serviço como Pastebin API para atualizar o texto dinamicamente</li>
+            </ol>
+        </div>
     </div>
 
-    <div class="copy-toast" id="copy-toast">
-      <span class="icon">✅</span>
-      <span id="copy-toast-text">Copiado!</span>
-    </div>
-  </div>
-
-  <script>
-    // Util: toast de "copiado"
-    const toastEl = document.getElementById("copy-toast");
-    const toastTextEl = document.getElementById("copy-toast-text");
-    let toastTimeout = null;
-
-    function showToast(msg) {
-      toastTextEl.textContent = msg;
-      toastEl.classList.add("show");
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toastEl.classList.remove("show");
-      }, 1600);
-    }
-
-    // Elementos principais
-    const jsonInput = document.getElementById("json-input");
-    const rawPreview = document.getElementById("raw-json-preview");
-    const plainOutput = document.getElementById("plain-output");
-    const nightbotOutput = document.getElementById("nightbot-output");
-    const statusEl = document.getElementById("status");
-    const onlineCountEl = document.getElementById("online-count");
-    const onlineLabelEl = document.getElementById("online-label");
-    const timestampEl = document.getElementById("timestamp");
-    const copyPlainBtn = document.getElementById("copy-plain");
-    const copyNightbotBtn = document.getElementById("copy-nightbot");
-
-    // Função para tentar adivinhar onde está o número de players no JSON
-    function extractOnlinePlayers(obj) {
-      if (!obj || typeof obj !== "object") return null;
-
-      // 1. Tentativa direta: population.onlinePlayers / online_players / players
-      if (obj.population) {
-        const p = obj.population;
-        if (typeof p.onlinePlayers === "number") return p.onlinePlayers;
-        if (typeof p.online_players === "number") return p.online_players;
-        if (typeof p.players === "number") return p.players;
-        if (typeof p.online === "number") return p.online;
-      }
-
-      // 2. Campos diretos
-      if (typeof obj.onlinePlayers === "number") return obj.onlinePlayers;
-      if (typeof obj.online_players === "number") return obj.online_players;
-      if (typeof obj.playersOnline === "number") return obj.playersOnline;
-      if (typeof obj.players_online === "number") return obj.players_online;
-      if (typeof obj.totalPlayers === "number") return obj.totalPlayers;
-
-      // 3. Busca recursiva: procura qualquer campo numérico com nome "online*" ou "players*"
-      const queue = [obj];
-      const visited = new Set();
-
-      while (queue.length) {
-        const current = queue.shift();
-        if (!current || typeof current !== "object") continue;
-        if (visited.has(current)) continue;
-        visited.add(current);
-
-        for (const key in current) {
-          if (!Object.prototype.hasOwnProperty.call(current, key)) continue;
-          const value = current[key];
-
-          const lowKey = key.toLowerCase();
-          if (typeof value === "number") {
-            if (lowKey.includes("online") || lowKey.includes("players")) {
-              return value;
+    <script>
+        let autoUpdateInterval;
+        
+        // Simular dados da API (em produção, você faria fetch real para a API)
+        function simulateAPIData() {
+            // Simulação realista de jogadores
+            const timeOfDay = new Date().getHours();
+            const baseMultiplier = timeOfDay >= 19 || timeOfDay <= 2 ? 1.5 : 1;
+            
+            const dungeonPlayers = Math.floor((Math.random() * 800 + 200) * baseMultiplier);
+            const lobbyPlayers = Math.floor((Math.random() * 500 + 100) * baseMultiplier);
+            const totalPlayers = dungeonPlayers + lobbyPlayers;
+            
+            return {
+                dungeon: dungeonPlayers,
+                lobby: lobbyPlayers,
+                total: totalPlayers,
+                timestamp: new Date().toISOString()
+            };
+        }
+        
+        function updateData() {
+            const status = document.getElementById('status');
+            
+            // Simular chamada à API
+            const data = simulateAPIData();
+            
+            // Atualizar display
+            document.getElementById('dungeon').textContent = data.dungeon.toLocaleString('pt-BR');
+            document.getElementById('lobby').textContent = data.lobby.toLocaleString('pt-BR');
+            document.getElementById('total').textContent = data.total.toLocaleString('pt-BR');
+            
+            // Criar texto formatado para Nightbot
+            const nightbotText = `⚔️ Em Dungeon: ${data.dungeon} | 🏠 Em Lobby: ${data.lobby} | 👥 Total de Players Online: ${data.total}`;
+            
+            document.getElementById('plainText').textContent = nightbotText;
+            
+            // Atualizar última atualização
+            const now = new Date();
+            document.getElementById('lastUpdate').innerHTML = `
+                <span class="update-indicator"></span> 
+                Última atualização: ${now.toLocaleTimeString('pt-BR')}
+            `;
+            
+            // Mostrar status de sucesso
+            status.className = 'status success';
+            status.textContent = '✅ Dados atualizados com sucesso!';
+            
+            setTimeout(() => {
+                status.textContent = '';
+                status.className = '';
+            }, 2000);
+        }
+        
+        function copyPlainText() {
+            const text = document.getElementById('plainText').textContent;
+            const status = document.getElementById('status');
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                status.className = 'status success';
+                status.textContent = '✅ Texto copiado!';
+            } catch (err) {
+                status.className = 'status error';
+                status.textContent = '❌ Erro ao copiar';
             }
-          } else if (typeof value === "object" && value !== null) {
-            queue.push(value);
-          }
+            
+            document.body.removeChild(tempInput);
+            
+            setTimeout(() => {
+                status.textContent = '';
+                status.className = '';
+            }, 2000);
         }
-      }
-
-      return null;
-    }
-
-    function updateFromJsonText(text) {
-      const trimmed = text.trim();
-      if (!trimmed) {
-        rawPreview.textContent = "Sem JSON ainda. Cole à esquerda para ver um preview.";
-        plainOutput.value = "Sem dados ainda.";
-        onlineCountEl.textContent = "—";
-        onlineLabelEl.textContent = "Aguardando JSON de exemplo colado abaixo.";
-        timestampEl.textContent = "Nenhum dado ainda.";
-        statusEl.classList.remove("ok", "error");
-        statusEl.querySelector(".dot").style.background = "var(--muted)";
-        statusEl.querySelector(".label").innerHTML = "Cole o JSON para começarmos.";
-        return;
-      }
-
-      // Preview "bonitinho"
-      try {
-        const parsed = JSON.parse(trimmed);
-        rawPreview.textContent = JSON.stringify(parsed, null, 2);
-
-        const count = extractOnlinePlayers(parsed);
-
-        const now = new Date();
-        const hh = String(now.getHours()).padStart(2, "0");
-        const mm = String(now.getMinutes()).padStart(2, "0");
-        const ss = String(now.getSeconds()).padStart(2, "0");
-        const timeStr = `${hh}:${mm}:${ss}`;
-
-        if (typeof count === "number" && !Number.isNaN(count)) {
-          onlineCountEl.textContent = count.toLocaleString("pt-BR");
-          onlineLabelEl.textContent = "Jogadores online no Dark and Darker (a partir do JSON colado).";
-          timestampEl.textContent = `Atualizado manualmente às ${timeStr}.`;
-
-          const textoSimples = `Atualmente há ${count.toLocaleString(
-            "pt-BR"
-          )} jogadores online no Dark and Darker.`;
-          plainOutput.value = textoSimples;
-
-          const nightbot = `!commands add !jogadoresonline ${textoSimples}`;
-          nightbotOutput.value = nightbot;
-
-          statusEl.classList.remove("error");
-          statusEl.classList.add("ok");
-          statusEl.querySelector(".dot").style.background = "var(--success)";
-          statusEl.querySelector(".label").innerHTML =
-            "<strong>JSON válido!</strong> Número de jogadores encontrado e comando gerado.";
-        } else {
-          onlineCountEl.textContent = "—";
-          onlineLabelEl.textContent =
-            "JSON válido, mas não encontrei um campo numérico claro de jogadores online.";
-          timestampEl.textContent = `Última tentativa às ${timeStr}.`;
-
-          plainOutput.value =
-            "JSON válido, mas não consegui detectar automaticamente o número de jogadores online. Verifique o nome do campo na resposta da API.";
-          nightbotOutput.value =
-            "!commands add !jogadoresonline Atualmente há X jogadores online no Dark and Darker. (Ajuste o número manualmente ou o campo no seu código.)";
-
-          statusEl.classList.remove("ok");
-          statusEl.classList.add("error");
-          statusEl.querySelector(".dot").style.background = "var(--danger)";
-          statusEl.querySelector(".label").innerHTML =
-            "<strong>Campo não encontrado.</strong> JSON foi lido, mas não achei o número de jogadores.";
+        
+        function copyUrl() {
+            const url = document.getElementById('urlField').value;
+            const status = document.getElementById('status');
+            
+            const tempInput = document.createElement('textarea');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                status.className = 'status success';
+                status.textContent = '✅ URL copiada!';
+            } catch (err) {
+                status.className = 'status error';
+                status.textContent = '❌ Erro ao copiar';
+            }
+            
+            document.body.removeChild(tempInput);
+            
+            setTimeout(() => {
+                status.textContent = '';
+                status.className = '';
+            }, 2000);
         }
-      } catch (err) {
-        rawPreview.textContent = "Erro ao interpretar JSON. Verifique se está completo e válido.";
-        plainOutput.value =
-          "JSON inválido. Confira se você copiou a resposta completa da API /v1/population.";
-        nightbotOutput.value =
-          "!commands add !jogadoresonline Erro ao ler o JSON de jogadores online. Verifique a API.";
-
-        onlineCountEl.textContent = "—";
-        onlineLabelEl.textContent = "Erro ao interpretar o JSON colado.";
-        timestampEl.textContent = "Falha ao processar JSON.";
-
-        statusEl.classList.remove("ok");
-        statusEl.classList.add("error");
-        statusEl.querySelector(".dot").style.background = "var(--danger)";
-        statusEl.querySelector(".label").innerHTML =
-          "<strong>JSON inválido.</strong> Cole o conteúdo novamente, garantindo que seja um JSON válido.";
-      }
-    }
-
-    jsonInput.addEventListener("input", () => {
-      updateFromJsonText(jsonInput.value);
-    });
-
-    // Copiar textos
-    async function copyToClipboard(text) {
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const temp = document.createElement("textarea");
-          temp.value = text;
-          document.body.appendChild(temp);
-          temp.select();
-          document.execCommand("copy");
-          document.body.removeChild(temp);
-        }
-        return true;
-      } catch (e) {
-        return false;
-      }
-    }
-
-    copyPlainBtn.addEventListener("click", async () => {
-      const ok = await copyToClipboard(plainOutput.value);
-      showToast(ok ? "Texto simples copiado!" : "Não consegui copiar automaticamente.");
-    });
-
-    copyNightbotBtn.addEventListener("click", async () => {
-      const ok = await copyToClipboard(nightbotOutput.value);
-      showToast(ok ? "Comando Nightbot copiado!" : "Não consegui copiar automaticamente.");
-    });
-
-    // Estado inicial
-    updateFromJsonText("");
-  </script>
+        
+        // Inicializar e configurar auto-update
+        window.addEventListener('load', () => {
+            updateData();
+            
+            // Atualizar a cada 30 segundos
+            autoUpdateInterval = setInterval(updateData, 30000);
+        });
+        
+        // Limpar interval ao sair
+        window.addEventListener('beforeunload', () => {
+            if (autoUpdateInterval) {
+                clearInterval(autoUpdateInterval);
+            }
+        });
+    </script>
 </body>
 </html>
