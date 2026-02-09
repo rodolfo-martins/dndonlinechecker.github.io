@@ -1,152 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DarkerDB API for Nightbot</title>
     <meta charset="UTF-8">
 </head>
 <body>
     <script>
-        // Obter dados em tempo real do site DarkerDB
-        async function getRealTimeData() {
+        // Buscar dados reais da API
+        async function getRealPopulationData() {
             try {
-                // Tentar buscar da página principal que tem os dados em tempo real
-                const response = await fetch('https://darkerdb.com/server-population');
-                const html = await response.text();
+                const response = await fetch('https://api.darkerdb.com/v1/population');
                 
-                // Procurar os dados no HTML usando vários padrões
-                const patterns = [
-                    // Padrão 1: procurar por "total", "lobby", "dungeon" seguidos de números
-                    { name: 'total', regex: /total[^0-9]*([0-9,]+)/gi },
-                    { name: 'lobby', regex: /lobby[^0-9]*([0-9,]+)/gi },
-                    { name: 'dungeon', regex: /dungeon[^0-9]*([0-9,]+)/gi },
-                    // Padrão 2: procurar por classes CSS específicas
-                    { name: 'total', regex: /class[^>]*total[^>]*>([0-9,]+)/gi },
-                    { name: 'lobby', regex: /class[^>]*lobby[^>]*>([0-9,]+)/gi },
-                    { name: 'dungeon', regex: /class[^>]*dungeon[^>]*>([0-9,]+)/gi },
-                    // Padrão 3: procurar por spans ou divs com dados
-                    { name: 'total', regex: /<[^>]*>([0-9,]+)<[^>]*>.*total/gi },
-                    { name: 'lobby', regex: /<[^>]*>([0-9,]+)<[^>]*>.*lobby/gi },
-                    { name: 'dungeon', regex: /<[^>]*>([0-9,]+)<[^>]*>.*dungeon/gi }
-                ];
-                
-                const result = { total: '', lobby: '', dungeon: '' };
-                
-                // Extrair todos os números da página
-                const allNumbers = html.match(/\d+[,\d]*/g) || [];
-                console.log('All numbers found:', allNumbers);
-                
-                // Tentar encontrar os três números maiores (provavelmente são os dados que queremos)
-                const sortedNumbers = allNumbers
-                    .map(n => parseInt(n.replace(/,/g, '')))
-                    .filter(n => n > 100) // Ignorar números muito pequenos
-                    .sort((a, b) => b - a);
-                
-                console.log('Sorted numbers:', sortedNumbers);
-                
-                if (sortedNumbers.length >= 3) {
-                    // Geralmente o total é o maior, dungeon o segundo, lobby o terceiro
-                    result.total = sortedNumbers[0].toLocaleString();
-                    result.dungeon = sortedNumbers[1].toLocaleString();
-                    result.lobby = sortedNumbers[2].toLocaleString();
-                    
-                    return result;
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
                 
-                // Se não encontrar números suficientes, tentar padrões específicos
-                for (const pattern of patterns) {
-                    const matches = html.match(pattern.regex);
-                    if (matches && matches.length > 0) {
-                        const match = matches[0].match(/([0-9,]+)/);
-                        if (match) {
-                            result[pattern.name] = match[1];
-                        }
-                    }
-                }
+                const data = await response.json();
                 
-                // Verificar se encontramos todos os dados
-                if (result.total && result.lobby && result.dungeon) {
-                    return result;
+                // Verificar se os dados existem
+                if (data && data.total !== undefined && data.lobby !== undefined && data.dungeon !== undefined) {
+                    const result = `Dungeon: ${data.dungeon.toLocaleString()} Lobby: ${data.lobby.toLocaleString()} Total: ${data.total.toLocaleString()}`;
+                    document.body.textContent = result;
+                } else {
+                    document.body.textContent = 'Dados inválidos da API';
                 }
                 
             } catch (error) {
-                console.log('Error fetching real-time data:', error);
-            }
-            
-            return null;
-        }
-        
-        // Tentar buscar dados reais (com fallback CORS)
-        async function getPopulationData() {
-← Edit index.html
-    
-    return null;
-}
-// Função principal para obter dados em tempo real
-async function getPopulationData() {
-    try {
-        // Primeiro tentar obter dados em tempo real do site
-        const realTimeData = await getRealTimeData();
-        
-        if (realTimeData && realTimeData.total && realTimeData.lobby && realTimeData.dungeon) {
-            // Usar dados reais encontrados
-            const result = `Dungeon: ${realTimeData.dungeon} Lobby: ${realTimeData.lobby} Total: ${realTimeData.total}`;
-            document.body.textContent = result;
-            return;
-        }
-        
-        // Se não conseguir dados em tempo real, tentar API
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const endpoints = [
-            'https://darkerdb.com/api/v1/population',
-            'https://darkerdb.com/api/v1/population-history'
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.total !== undefined) {
-                        const result = `Dungeon: ${data.dungeon.toLocaleString()} Lobby: ${data.lobby.toLocaleString()} Total: ${data.total.toLocaleString()}`;
-                        document.body.textContent = result;
-                        return;
-                    } else if (data.data && data.data.length > 0) {
-                        const latest = data.data[data.data.length - 1];
-                        const result = `Dungeon: ${latest.dungeon.toLocaleString()} Lobby: ${latest.lobby.toLocaleString()} Total: ${latest.total.toLocaleString()}`;
-                        document.body.textContent = result;
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.log('API attempt failed');
-                continue;
+                console.error('Erro ao buscar dados:', error);
+                document.body.textContent = `Erro: ${error.message}`;
             }
         }
-    } catch (error) {
-        console.log('All real-time attempts failed');
-    }
-    
-    // Fallback: usar dados atuais realistas baseados no horário
-    const now = new Date();
-    const hour = now.getHours();
-    
-    // Ajustar baseado no horário atual (você mencionou ~10k agora)
-    let baseTotal = 10000; // Base realista
-    
-    if (hour >= 20 && hour <= 23) { // Horário de pico
-        baseTotal = 12000 + Math.floor(Math.random() * 2000);
-    } else if (hour >= 14 && hour <= 19) { // Tarde
-        baseTotal = 10000 + Math.floor(Math.random() * 1500);
-    } else if (hour >= 10 && hour <= 13) { // Meio-dia
-        baseTotal = 8000 + Math.floor(Math.random() * 1000);
-    } else { // Madrugada/manhã
-        baseTotal = 5000 + Math.floor(Math.random() * 1000);
-    }
-    
-    // Calcular lobby e dungeon baseado no total
-    const baseLobby = Math.floor(baseTotal * 0.25); // ~25% no lobby
-    const baseDungeon = baseTotal - baseLobby; // ~75% em dungeon
-    
-    // Adicionar pequena variação
-    const variation = () => Math.floor(Math.random() * 200) - 100;
-    
-    const total = (baseTotal + variation()).toLocaleString();
-    const lobby = (baseLobby + variation()).toLocaleString();
-    const dungeon = (baseDungeon + variation()).toLocaleString();
-    
-    const result = `Dungeon: ${dungeon} Lobby: ${lobby} Total: ${total}`;
-    document.body.textContent = result;
-}
-getPopulationData();
+        
+        // Executar imediatamente
+        getRealPopulationData();
+    </script>
+</body>
+</html>
